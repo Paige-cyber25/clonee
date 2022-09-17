@@ -3,7 +3,7 @@ import React from 'react'
 import { authUserDetails } from '../../libs/app';
 import OrderItemAction from './OrderItemAction'
 
-const OrderItem = ({ item, update = false }) => {
+const OrderItem = ({ item, update = false , setItemId, getOrderItems}) => {
     const { store, token } = authUserDetails();
 console.log(token,'token')
     return (
@@ -46,7 +46,7 @@ console.log(token,'token')
             {
                 update === true ? (
                     <td>
-                        <OrderItemAction item={item}/>
+                        <OrderItemAction setItemId={setItemId} item={item} getOrderItems={ getOrderItems} />
                     </td>
                 ) : null
             }
