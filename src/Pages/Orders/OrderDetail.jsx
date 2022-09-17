@@ -15,13 +15,18 @@ const OrderDetail = (props) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [loading, setLoading] = useState(false);
   const { store, token } = authUserDetails();
+  const [quantity, setQuantity] = useState(0)
+  const [price, setPrice] = useState(0)
+      const [variation, setVariation] = useState(0)
+
+
   console.log(orderItems, "item");
   console.log(orderDetails, "details");
-
-  let order;
-  orderItems.map((item) => {
-    order = item;
-  });
+const [itemId, setItemId] = useState(0)
+  // let order;
+  // orderItems.map((item) => {
+  //   order = item;
+  // });
 
   useEffect(() => {
     getOrderDetails();
@@ -44,9 +49,9 @@ const OrderDetail = (props) => {
 
   async function getOrderDetails() {
     try {
-      var request = axios.get(`/order/${order_id}`);
-      var response = (await request).data;
-
+      let request = axios.get(`/order/${order_id}`);
+      let response = (await request).data;
+console.log(response, "response for details page for me")
       if (response.success == true) {
         setOrderDetails(response.data);
       } else {
@@ -56,7 +61,10 @@ const OrderDetail = (props) => {
       responseMessage("Something went wrong, please try again!", "error");
     }
   }
-
+  const handleOnchange = (event) => {
+    setSelectedOption(event)
+  console.log(event, "event aye")
+}
   async function getOrderItems() {
     try {
       var request = axios.get(`/order/items/${order_id}`);
@@ -72,18 +80,21 @@ const OrderDetail = (props) => {
     }
   }
 
-  async function updateOrder(id) {
+  async function updateOrder() {
+    console.log(itemId, "wahala")
+    console.log(quantity, "quantity")
+
     try {
-      var data = {
-        item_id: order.id,
-        unit_price: order.price,
-        quantity: order.quantity,
-        variation: "",
+      let data = {
+        item_id: itemId,
+        unit_price: price,
+        quantity: quantity,
+        // variation: variation,
       };
 
-      var request = axios.put(`/order/item/update`, data);
-      var response = (await request).data;
-
+      let request = axios.put(`/order/item/update`, data);
+      let response = (await request).data;
+console.log(response, "respp wahala check it")
       if (response.success) {
         responseMessage(response.message, "success");
         getOrderItems();
@@ -98,14 +109,30 @@ const OrderDetail = (props) => {
       }
     }
   }
+  function handlePriceChange(event) {
+    const { value } = event.target
+         console.log(value, "price value")
 
+   setPrice(value)
+  }
+  function handleVariationChange(event) {
+    const { value } = event.target
+         console.log(value, "variation value")
+
+   setVariation(value)
+  }
+   function handleQuantityChange(event) {
+     const { value } = event.target
+     console.log(value, "quantity value")
+   setQuantity(value)
+ }
   const productOptions =
     products.length > 0 &&
     products.map(({ id, name }) => {
       return { value: id, label: name };
     });
 
-  const subTotal = orderItems.reduce((accummulator, orderItem) => {
+  const subTotal = orderItems?.reduce((accummulator, orderItem) => {
     return accummulator + orderItem?.price;
   }, 0);
 
@@ -113,9 +140,9 @@ const OrderDetail = (props) => {
 
   let discount;
   if (orderDetails?.coupon?.type === "percentage") {
-    discount = ((orderDetails?.coupon?.discount / 100) * subTotal)?.toFixed(2);
+    discount = ((orderDetails?.coupon?.discount / 100) * subTotal);
   } else {
-    discount = orderDetails?.coupon?.discount?.toFixed(2) || "0.00";
+    discount = orderDetails?.coupon?.discount || "0.00";
   }
 
   const total = subTotal + shippingFee - discount;
@@ -177,11 +204,13 @@ const OrderDetail = (props) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {orderItems.length > 0 ? (
+                        {orderItems?.length > 0 ? (
                           <>
-                            {orderItems.map((item, index) => (
+                            {orderItems?.map((item, index) => (
                               <OrderItem
                                 item={item}
+                                setItemId={setItemId}
+                                getOrderItems={getOrderItems}
                                 update={props.update}
                                 key={index}
                               />
@@ -199,7 +228,7 @@ const OrderDetail = (props) => {
                                     {getSymbolFromCurrency(
                                       store?.currency?.abbr
                                     )}
-                                    &nbsp;{subTotal.toFixed(2) || "0.00"}
+                                    &nbsp;{subTotal || "0.00"}
                                   </td>
                                 </tr>
                                 <tr>
@@ -223,7 +252,7 @@ const OrderDetail = (props) => {
                                       store?.currency?.abbr
                                     )}
                                     &nbsp;
-                                    {orderDetails?.shipping_fee.toFixed(2) ||
+                                    {orderDetails?.shipping_fee ||
                                       "0.00"}
                                   </td>
                                 </tr>
@@ -239,7 +268,7 @@ const OrderDetail = (props) => {
                                     {getSymbolFromCurrency(
                                       store?.currency?.abbr
                                     )}
-                                    &nbsp;{total.toFixed(2) || "0.00"}
+                                    &nbsp;{total || "0.00"}
                                   </th>
                                 </tr>
                               </tbody>
@@ -641,7 +670,7 @@ const OrderDetail = (props) => {
                         <div className="flex-grow-1 ms-2">
                           <h6 className="mb-0">
                             {getSymbolFromCurrency(store?.currency?.abbr)}&nbsp;
-                            {total.toFixed(2) || "0.00"}
+                            {total || "0.00"}
                           </h6>
                         </div>
                       </div>
@@ -671,7 +700,7 @@ const OrderDetail = (props) => {
                 aria-label="Close"
                 id="close-modal"
               ></button>
-              <div className="mb-3 mt-4">
+              {/* <div className="mb-3 mt-4">
                 <label htmlFor="productname-field" className="form-label">
                   Product
                 </label>
@@ -684,17 +713,29 @@ const OrderDetail = (props) => {
                   closeMenuOnSelect={false}
                   options={productOptions}
                   value={selectedOption}
-                  onChange={setSelectedOption}
+                  onChange={handleOnchange}
                 >
-                  Select Products
+                  Select Products 
                 </Select>
+              </div> */}
+              <div>
+                <label>Variation</label>
+                <input type="text"placeholder="variation" value={variation} onChange={handleVariationChange} />
               </div>
-
+              <div>
+                <label>Quantity</label>
+                <input type="text"placeholder="quantity" value={quantity} onChange={handleQuantityChange} />
+              </div>
+              <div>
+                <label>Price</label>
+                <input type="text" placeholder="price" value={price} onChange={ handlePriceChange} />
+              </div>
               <button
                 type="button"
                 className="btn btn-success"
                 id="edit-btn"
-                onClick={()=>updateOrder(orderDetails.id)}
+                onClick={() => updateOrder(orderItems)}
+                data-bs-dismiss="modal"
               >
                 Update
               </button>

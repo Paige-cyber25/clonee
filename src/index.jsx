@@ -2,12 +2,13 @@ import axios from "axios";
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
+// import { BrowserRouter } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
 import reportWebVitals from './reportWebVitals';
 
 import "./styles.css";
 
-window.base_url = "http://3.237.32.174:8000/";
+window.base_url = "http://dev.wearslot.com";
 window.endpoint = window.base_url + "/api";
 window.token = localStorage.getItem("token");
 axios.defaults.baseURL = window.endpoint;
